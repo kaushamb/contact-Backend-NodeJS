@@ -14,17 +14,8 @@ const getContacts = asyncHandler(async (req, res) => {
 //@access public
 
 const getContact = asyncHandler(async (req, res) => {
-  console.log(req?.body, req.params.id);
-  const { name, email, phone } = req.body;
-
-  if (!name || !email || !phone) {
-    res.status(400);
-    throw new Error("all field are mandatory.");
-  }
-  res.status(201).json({
-    message: "from contact router get from controller",
-    res: req?.body,
-  });
+  const contacts = await Contact.findOne({_id:req.params.id});
+  res.status(200).json(contacts);
 });
 
 //@desc post contact
