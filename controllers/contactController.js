@@ -69,19 +69,19 @@ const updateContact = asyncHandler(async (req, res) => {
 //@access public
 
 const deleteContact = asyncHandler(async (req, res) => {
-//   const contact = await Contact.findOne({_id:req.params.id});
-//   if (!contact) {
-//     res.status(404);
-//     throw new Error("Contact not found.");
-//   }
-//   if (contact.user_id.toString() !== req.user.id) {
-//     res.status(403);
-//     throw new Error(
-//       "User dont have permission to update the other user contact.",
-//     );
-//   }
-//   const Deletedcontact = await Contact.findOneAndDelete(req.params.id);
-//   res.status(200).json(Deletedcontact);
+  const contact = await Contact.findById(req.params.id);
+  if (!contact) {
+    res.status(404);
+    throw new Error("Contact not found.");
+  }
+  if (contact.user_id.toString() !== req.user.id) {
+    res.status(403);
+    throw new Error(
+      "User dont have permission to update the other user contact.",
+    );
+  }
+  await Contact.deleteOne({_id:req.params.id});
+  res.status(200).json(contact);
 });
 
 module.exports = {
