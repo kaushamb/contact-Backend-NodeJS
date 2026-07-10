@@ -2,19 +2,19 @@ const asyncHandler = require("express-async-handler");
 const Contact = require("../models/contactModel");
 //@desc get contacts
 //@route route  /api/contacts
-//@access public
+//@access private
 
 const getContacts = asyncHandler(async (req, res) => {
-  const contacts = await Contact.find();
+  const contacts = await Contact.find({ user_id: req.user.id });
   res.status(200).json(contacts);
 });
 
 //@desc get contact
 //@route route  /api/contacts
-//@access public
+//@access private
 
 const getContact = asyncHandler(async (req, res) => {
-  const contacts = await Contact.findOne({_id:req.params.id});
+  const contacts = await Contact.findOne({ _id: req.params.id });
   res.status(200).json(contacts);
 });
 
@@ -33,6 +33,7 @@ const createContact = asyncHandler(async (req, res) => {
     name,
     email,
     phone,
+    user_id: req.user.id,
   });
   res.status(201).json(contact);
 });
@@ -42,13 +43,23 @@ const createContact = asyncHandler(async (req, res) => {
 //@access public
 
 const updateContact = asyncHandler(async (req, res) => {
-  const contact= await Contact.findById(req.params.id)
+  const contact = await Contact.findById(req.params.id);
 
   if (!contact) {
     res.status(404);
     throw new Error("Contact not found.");
   }
-  const updatedContact= await Contact.findByIdAndUpdate(req.params.id,req.body,{new: true})
+  if (contact.user_id.toString() !== req.user.id) {
+    res.status(403);
+    throw new Error(
+      "User dont have permission to update the other user contact.",
+    );
+  }
+  const updatedContact = await Contact.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true },
+  );
 
   res.status(200).json(updatedContact);
 });
@@ -58,15 +69,19 @@ const updateContact = asyncHandler(async (req, res) => {
 //@access public
 
 const deleteContact = asyncHandler(async (req, res) => {
-   const contact= await Contact.findOneAndDelete(req.params.id)
-
+//   const contact = await Contact.findOne({_id:req.params.id});
 //   if (!contact) {
 //     res.status(404);
 //     throw new Error("Contact not found.");
 //   }
-//   await Contact.deleteOne(); 
-
-  res.status(200).json(contact);
+//   if (contact.user_id.toString() !== req.user.id) {
+//     res.status(403);
+//     throw new Error(
+//       "User dont have permission to update the other user contact.",
+//     );
+//   }
+//   const Deletedcontact = await Contact.findOneAndDelete(req.params.id);
+//   res.status(200).json(Deletedcontact);
 });
 
 module.exports = {
